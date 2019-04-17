@@ -7,27 +7,99 @@ public class BlackJackApp {
 		PakjeKaarten pakje = new PakjeKaarten();
 		pakje.schudden();
 		pakje.toonPakje();
+		Spel spel = new Spel();
+		spel.startSpel();
+		boolean stoppen = false;
+		char keuze;
+		int i = 0;
+		int score = 0;
+		Card[] hand = new Card[10]; // is 10genoeg? meestal al af bij meer dan 6 kaarten
+		// loop totdat gebruiker stopt of stuk is'
+		while (!stoppen) {
+			keuze = spel.gebruikersKeuze();
+			if (keuze == 'q') {
+				stoppen = true;
+				score = -1; // om te achterhalen dat speler is gestopt
+			} else if (keuze == 'p') {
+				stoppen = true;
+			} else if (keuze == 'k') {
+				hand[i] = pakje.geefKaart();
+				score = spel.bepaalScore(keuze, score, hand[i].waarde);
+				for (int x = 0; x < hand.length; x++) {
+					if (hand[x] == null) {
+						break;
+					}
+					System.out.print(hand[x].kleur + " " + hand[x].naam + " ");
+				}
+				System.out.println();
+				System.out.println("Uw huidige score is: " + score);
+				i++;
+				if (score > 20) {
+					stoppen = true;
+				}
+			} else {
+				System.out.println("De input is ongeldig, voer aub een geldige waarde in.");
+			}
+		}
+		spel.endGame(score);
 	}
+
+}
+
+class Spel {
+	void startSpel() {
+		System.out.println("Met de optie stopt q het spel");
+		System.out.println("Met de optie stopt p past u en eindigt uw beurt.");
+		System.out.println("Met de optie stopt k krijgt u (nog) een kaart");
+	}
+
+	char gebruikersKeuze() {
+		System.out.println("maak uw keuze:");
+		Scanner scanner = new Scanner(System.in);
+		String invoer = scanner.nextLine();
+		invoer = invoer.toLowerCase();
+		char eersteLetter = invoer.charAt(0);
+		return eersteLetter;
+	}
+
+	int bepaalScore(char keuze, int score,int waarde) {
+		score = score + waarde;	
+		return score;
+	}
+	void endGame(int score) {
+		if (score == -1) {
+			System.out.println("U heeft het spel gestopt.");
+		} else if (score == 21) {
+			System.out.println("Gewonnen, u heeft " + score + " punten.");
+		} else if (score > 21) {
+			System.out.println("Helaas, u heeft " + score + " punten. Dit is te veel.");
+		} else {
+			System.out.println("Helaas, u heeft " + score + " punten. Dit is niet genoeg.");
+		}
+	}
+
 }
 
 class PakjeKaarten {
 	Card[] pakjeOngeschud = new Card[52];
 	Card[] pakjeGeschud = new Card[52];
-	PakjeKaarten(){
+	int laatstGedeeldeKaart = 0;
+
+	PakjeKaarten() {
 		for (int i = 0; i < 13; i++) {
-			this.pakjeOngeschud[i] = new Card(i+1, "Harten");
+			this.pakjeOngeschud[i] = new Card(i + 1, "Harten");
 		}
 		for (int i = 0; i < 13; i++) {
-			this.pakjeOngeschud[i+13] = new Card(i+1, "Ruiten");
+			this.pakjeOngeschud[i + 13] = new Card(i + 1, "Ruiten");
 		}
 		for (int i = 0; i < 13; i++) {
-			this.pakjeOngeschud[i+26] = new Card(i+1, "Schoppen");
+			this.pakjeOngeschud[i + 26] = new Card(i + 1, "Schoppen");
 		}
 		for (int i = 0; i < 13; i++) {
-			this.pakjeOngeschud[i+39] = new Card(i+1, "Klaver");
+			this.pakjeOngeschud[i + 39] = new Card(i + 1, "Klaver");
 		}
 	}
-	
+
 	void schudden() {
 		// extra array om bij te houden of waarde al is gebruikt
 		int[] gebruikt = new int[52];
@@ -48,14 +120,21 @@ class PakjeKaarten {
 			}
 		}
 	}
-	
+
 	void toonPakje() {
 		for (int i = 0; i < this.pakjeGeschud.length; i++) {
 			System.out.print(this.pakjeGeschud[i].kleur + " ");
 			System.out.println(this.pakjeGeschud[i].naam);
 		}
 	}
-	
+
+	Card geefKaart() {
+		Card kaart = this.pakjeGeschud[laatstGedeeldeKaart];
+		laatstGedeeldeKaart++;
+		return kaart;
+
+	}
+
 }
 
 class Card {
