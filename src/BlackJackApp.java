@@ -11,10 +11,20 @@ public class BlackJackApp {
 		spel.startSpel();
 		boolean stoppen = false;
 		char keuze;
-		int i = 0;
 		int score = 0;
 		Card[] hand = new Card[10]; // is 10genoeg? meestal al af bij meer dan 6 kaarten
+		//geef eerste twee kaarten;
+		hand[0] = pakje.geefKaart();
+		hand[1] = pakje.geefKaart();
+		System.out.println();
+		System.out.println("Dit zijn uw eerste twee kaarten:");
+		System.out.print(hand[0].kleur + " " + hand[0].naam + " | ");
+		System.out.println(hand[1].kleur + " " + hand[1].naam);
+		score = hand[0].waarde + hand[1].waarde;
+		spel.toonScore(score);
+		int i = 2;
 		// loop totdat gebruiker stopt of stuk is'
+		
 		while (!stoppen) {
 			keuze = spel.gebruikersKeuze();
 			if (keuze == 'q') {
@@ -31,8 +41,7 @@ public class BlackJackApp {
 					}
 					System.out.print(hand[x].kleur + " " + hand[x].naam + " ");
 				}
-				System.out.println();
-				System.out.println("Uw huidige score is: " + score);
+				spel.toonScore(score);
 				i++;
 				if (score > 20) {
 					stoppen = true;
@@ -62,10 +71,15 @@ class Spel {
 		return eersteLetter;
 	}
 
-	int bepaalScore(char keuze, int score,int waarde) {
-		score = score + waarde;	
+	int bepaalScore(char keuze, int score, int waarde) {
+		score = score + waarde;
 		return score;
 	}
+	void toonScore(int score) {
+		System.out.println();
+		System.out.println("Uw huidige score is: " + score);
+	}
+
 	void endGame(int score) {
 		if (score == -1) {
 			System.out.println("U heeft het spel gestopt.");
