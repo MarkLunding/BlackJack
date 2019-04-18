@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
@@ -12,15 +13,15 @@ public class BlackJackApp {
 		boolean stoppen = false;
 		char keuze;
 		int score = 0;
-		Card[] hand = new Card[10]; // is 10genoeg? meestal al af bij meer dan 6 kaarten
+		ArrayList<Card> hand = new ArrayList<Card>();
 		//geef eerste twee kaarten;
-		hand[0] = pakje.geefKaart();
-		hand[1] = pakje.geefKaart();
+		hand.add (pakje.geefKaart());
+		hand.add (pakje.geefKaart());
 		System.out.println();
 		System.out.println("Dit zijn uw eerste twee kaarten:");
-		System.out.print(hand[0].kleur + " " + hand[0].naam + " | ");
-		System.out.println(hand[1].kleur + " " + hand[1].naam);
-		score = hand[0].waarde + hand[1].waarde;
+		System.out.print(hand.get(0).kleur + " " + hand.get(0).naam + " | ");
+		System.out.println(hand.get(1).kleur + " " + hand.get(1).naam);
+		score = hand.get(0).waarde + hand.get(1).waarde;
 		spel.toonScore(score);
 		int i = 2;
 		// loop totdat gebruiker stopt of stuk is'
@@ -33,13 +34,11 @@ public class BlackJackApp {
 			} else if (keuze == 'p') {
 				stoppen = true;
 			} else if (keuze == 'k') {
-				hand[i] = pakje.geefKaart();
-				score = spel.bepaalScore(keuze, score, hand[i].waarde);
-				for (int x = 0; x < hand.length; x++) {
-					if (hand[x] == null) {
-						break;
-					}
-					System.out.print(hand[x].kleur + " " + hand[x].naam + " ");
+				hand.add (pakje.geefKaart());
+				score = spel.bepaalScore(keuze, score, hand.get(i).waarde);
+				int length = hand.size();
+				for(int x = 0; x < length; x++) {
+					System.out.print(hand.get(x).kleur + " " + hand.get(x).naam + " ");
 				}
 				spel.toonScore(score);
 				i++;
