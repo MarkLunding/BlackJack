@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -13,10 +12,10 @@ public class BlackJackApp {
 		boolean stoppen = false;
 		char keuze;
 		int score = 0;
-		ArrayList<Card> hand = new ArrayList<Card>();
-		//geef eerste twee kaarten;
-		hand.add (pakje.geefKaart());
-		hand.add (pakje.geefKaart());
+		ArrayList<Card> hand = new ArrayList<>();
+		// geef eerste twee kaarten;
+		hand.add(pakje.geefKaart());
+		hand.add(pakje.geefKaart());
 		System.out.println();
 		System.out.println("Dit zijn uw eerste twee kaarten:");
 		System.out.print(hand.get(0).kleur + " " + hand.get(0).naam + " | ");
@@ -25,8 +24,8 @@ public class BlackJackApp {
 		spel.toonScore(score);
 		int i = 2;
 		// loop totdat gebruiker stopt of stuk is'
-		
-		while (!stoppen) {
+		outer:
+			while (!stoppen && score < 21) { // als 21 bij eerste 2 kaarten, dan niet de loop in.
 			keuze = spel.gebruikersKeuze();
 			if (keuze == 'q') {
 				stoppen = true;
@@ -34,17 +33,26 @@ public class BlackJackApp {
 			} else if (keuze == 'p') {
 				stoppen = true;
 			} else if (keuze == 'k') {
-				hand.add (pakje.geefKaart());
+				hand.add(pakje.geefKaart());
 				score = spel.bepaalScore(keuze, score, hand.get(i).waarde);
 				int length = hand.size();
-				for(int x = 0; x < length; x++) {
+				for (int x = 0; x < length; x++) {
 					System.out.print(hand.get(x).kleur + " " + hand.get(x).naam + " ");
 				}
-				spel.toonScore(score);
 				i++;
-				if (score > 20) {
+				if (score > 21) {
+					for (Card kaart : hand) {
+						if (kaart.aas) {
+							score -= 10;
+							kaart.aas = false;
+							spel.toonScore(score);
+							continue outer;
+
+						}
+					}
 					stoppen = true;
 				}
+				spel.toonScore(score);
 			} else {
 				System.out.println("De input is ongeldig, voer aub een geldige waarde in.");
 			}
@@ -74,12 +82,14 @@ class Spel {
 		score = score + waarde;
 		return score;
 	}
+
 	void toonScore(int score) {
 		System.out.println();
 		System.out.println("Uw huidige score is: " + score);
 	}
 
 	void endGame(int score) {
+
 		if (score == -1) {
 			System.out.println("U heeft het spel gestopt.");
 		} else if (score == 21) {
