@@ -24,8 +24,7 @@ public class BlackJackApp {
 		spel.toonScore(score);
 		int i = 2;
 		// loop totdat gebruiker stopt of stuk is'
-		outer:
-			while (!stoppen && score < 21) { // als 21 bij eerste 2 kaarten, dan niet de loop in.
+		outer: while (!stoppen && score < 21) { // als 21 bij eerste 2 kaarten, dan niet de loop in.
 			keuze = spel.gebruikersKeuze();
 			if (keuze == 'q') {
 				stoppen = true;
@@ -124,24 +123,30 @@ class PakjeKaarten {
 	}
 
 	void schudden() {
-		// extra array om bij te houden of waarde al is gebruikt
-		int[] gebruikt = new int[52];
-		for (int i = 0; i < gebruikt.length; i++) {
-			gebruikt[i] = 0;
+		// nieuwe versie met dank aan Raimond Loman
+		Random kaartNummer = new Random();
+		for (int i = 0; i < pakjeOngeschud.length; i++) {
+			int nr = kaartNummer.nextInt(52);
+			Card tempCard = pakjeOngeschud[i];
+			pakjeOngeschud[i] = pakjeOngeschud[nr];
+			pakjeOngeschud[nr] = tempCard;
 		}
-		for (int i = 0; i < 52; i++) {
-			Random kaartNummer = new Random();
-			boolean nietGebruikt = true;
-			while (nietGebruikt) {
-				int nr = kaartNummer.nextInt(52);
-				if (gebruikt[nr] == 0) {
+		this.pakjeGeschud = pakjeOngeschud;
 
-					this.pakjeGeschud[i] = pakjeOngeschud[nr];
-					gebruikt[nr] = 1;
-					nietGebruikt = false;
-				}
-			}
-		}
+//		// extra array om bij te houden of waarde al is gebruikt
+//		int[] gebruikt = new int[52];
+//		for (int i = 0; i < 52; i++) {
+//			Random kaartNummer = new Random();
+//			boolean nietGebruikt = true;
+//			while (nietGebruikt) {
+//				int nr = kaartNummer.nextInt(52);
+//				if (gebruikt[nr] == 0) {
+//					this.pakjeGeschud[i] = pakjeOngeschud[nr];
+//					gebruikt[nr] = 1;
+//					nietGebruikt = false;
+//				}
+//			}
+//		}
 	}
 
 	void toonPakje() {
@@ -155,7 +160,6 @@ class PakjeKaarten {
 		Card kaart = this.pakjeGeschud[laatstGedeeldeKaart];
 		laatstGedeeldeKaart++;
 		return kaart;
-
 	}
 
 }
