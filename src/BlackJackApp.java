@@ -9,54 +9,71 @@ public class BlackJackApp {
 		pakje.toonPakje();
 		Spel spel = new Spel();
 		spel.startSpel();
+
 		boolean stoppen = false;
 		char keuze;
-		int score = 0;
+
 		ArrayList<Card> hand = new ArrayList<>();
-		// geef eerste twee kaarten;
+		ArrayList<Card> bank = new ArrayList<>();
+		// geef eerste twee kaarten (om en om);
 		hand.add(pakje.geefKaart());
+		bank.add(pakje.geefKaart());
 		hand.add(pakje.geefKaart());
-		System.out.println();
-		System.out.println("Dit zijn uw eerste twee kaarten:");
-		System.out.print(hand.get(0).kleur + " " + hand.get(0).naam + " | ");
-		System.out.println(hand.get(1).kleur + " " + hand.get(1).naam);
-		score = hand.get(0).waarde + hand.get(1).waarde;
-		spel.toonScore(score);
+		bank.add(pakje.geefKaart());
+		int bankScore = spel.toonEersteTwee(bank, "bank");
+		spel.toonScore(bankScore, "de bank");
+		int spelerScore = spel.toonEersteTwee(hand, "speler");
+		spel.toonScore(spelerScore, "de speler");
+
 		int i = 2;
 		// loop totdat gebruiker stopt of stuk is'
-		outer: while (!stoppen && score < 21) { // als 21 bij eerste 2 kaarten, dan niet de loop in.
+		outer: while (!stoppen && spelerScore < 21) { // als 21 bij eerste 2 kaarten, dan niet de loop in.
 			keuze = spel.gebruikersKeuze();
 			if (keuze == 'q') {
 				stoppen = true;
-				score = -1; // om te achterhalen dat speler is gestopt
+				spelerScore = -1; // om te achterhalen dat speler is gestopt
 			} else if (keuze == 'p') {
 				stoppen = true;
 			} else if (keuze == 'k') {
 				hand.add(pakje.geefKaart());
-				score = spel.bepaalScore(keuze, score, hand.get(i).waarde);
-				int length = hand.size();
-				for (int x = 0; x < length; x++) {
-					System.out.print(hand.get(x).kleur + " " + hand.get(x).naam + " ");
+				spelerScore = spel.bepaalScore(spelerScore, hand.get(i).waarde);
+				System.out.println("==========");
+				for (int x = 0; x < hand.size(); x++) {
+					System.out.print(hand.get(x).symbool + " " + hand.get(x).naam + " | ");
 				}
 				i++;
-				if (score > 21) {
+				if (spelerScore > 21) {
 					for (Card kaart : hand) {
 						if (kaart.aas) {
-							score -= 10;
+							spelerScore -= 10;
 							kaart.aas = false;
-							spel.toonScore(score);
+							spel.toonScore(spelerScore, "de speler");
 							continue outer;
-
 						}
 					}
 					stoppen = true;
 				}
-				spel.toonScore(score);
+				System.out.println();
+				spel.toonScore(spelerScore, "de speler");
 			} else {
 				System.out.println("De input is ongeldig, voer aub een geldige waarde in.");
 			}
 		}
-		spel.endGame(score);
+		// en nu de bank, die stopt als hij 17 of hoger heeft
+		int j = 2;
+		while (bankScore < 17) {
+			bank.add(pakje.geefKaart());
+			bankScore = spel.bepaalScore(bankScore, bank.get(j).waarde);
+			System.out.println("==========");
+			for (int x = 0; x < bank.size(); x++) {
+				System.out.print(bank.get(x).symbool + " " + bank.get(x).naam + " | ");
+			}
+			System.out.println();
+			spel.toonScore(bankScore, "de bank");
+			j++;
+		}
+
+		spel.endGame(spelerScore, bankScore);
 	}
 
 }
@@ -68,6 +85,15 @@ class Spel {
 		System.out.println("Met de optie stopt k krijgt u (nog) een kaart");
 	}
 
+	int toonEersteTwee(ArrayList<Card> cards, String speler) {
+		System.out.println("==========");
+		System.out.println("Dit zijn de kaarten van: " + speler);
+		System.out.print(cards.get(0).symbool + " " + cards.get(0).naam + " | ");
+		System.out.println(cards.get(1).symbool + " " + cards.get(1).naam);
+
+		return cards.get(0).waarde + cards.get(1).waarde;
+	}
+
 	char gebruikersKeuze() {
 		System.out.println("maak uw keuze:");
 		Scanner scanner = new Scanner(System.in);
@@ -77,29 +103,35 @@ class Spel {
 		return eersteLetter;
 	}
 
-	int bepaalScore(char keuze, int score, int waarde) {
+	int bepaalScore(int score, int waarde) {
 		score = score + waarde;
 		return score;
 	}
 
-	void toonScore(int score) {
+	void toonScore(int score, String speler) {
+		System.out.println("De huidige score van " + speler + " is: " + score);
+		System.out.println("==========");
 		System.out.println();
-		System.out.println("Uw huidige score is: " + score);
 	}
 
-	void endGame(int score) {
-
-		if (score == -1) {
-			System.out.println("U heeft het spel gestopt.");
-		} else if (score == 21) {
-			System.out.println("Gewonnen, u heeft " + score + " punten.");
-		} else if (score > 21) {
-			System.out.println("Helaas, u heeft " + score + " punten. Dit is te veel.");
+	void endGame(int spelerScore, int bankScore) {
+		if (spelerScore == -1) {
+			System.out.println("U heeft het spel gestopt. De bank wint.");
+		} else if (spelerScore > 21) {
+			System.out.println("Helaas, u heeft " + spelerScore + " punten. Dit is te veel.");
+		} else if (bankScore > 21) {
+			System.out.println("De bank is stuk en u niet. U heeft gewonnen");
+		} else if (bankScore == 21) {
+			System.out.println("De bank heeft 21 en wint.");
+		} else if (spelerScore == 21) {
+			System.out.println("Gewonnen, u heeft " + spelerScore + " punten.");
+		} else if (spelerScore > bankScore) {
+			System.out.println("Gewonnen, uw score: " + spelerScore + " is beter dan die van de bank: " + bankScore);
 		} else {
-			System.out.println("Helaas, u heeft " + score + " punten. Dit is niet genoeg.");
+			System.out.println("Verloren, uw score: " + spelerScore + " is minder dan die van de bank: " + bankScore);
 		}
-	}
 
+	}
 }
 
 class PakjeKaarten {
@@ -123,7 +155,8 @@ class PakjeKaarten {
 	}
 
 	void schudden() {
-		// nieuwe versie met dank aan Raimond Loman
+		// idee is simpel, wissel gewoon over de hele array met wikkekeurige
+		// andere positie uit de array en je pakje is geschud.
 		Random kaartNummer = new Random();
 		for (int i = 0; i < pakjeOngeschud.length; i++) {
 			int nr = kaartNummer.nextInt(52);
@@ -132,28 +165,17 @@ class PakjeKaarten {
 			pakjeOngeschud[nr] = tempCard;
 		}
 		this.pakjeGeschud = pakjeOngeschud;
-
-//		// extra array om bij te houden of waarde al is gebruikt
-//		int[] gebruikt = new int[52];
-//		for (int i = 0; i < 52; i++) {
-//			Random kaartNummer = new Random();
-//			boolean nietGebruikt = true;
-//			while (nietGebruikt) {
-//				int nr = kaartNummer.nextInt(52);
-//				if (gebruikt[nr] == 0) {
-//					this.pakjeGeschud[i] = pakjeOngeschud[nr];
-//					gebruikt[nr] = 1;
-//					nietGebruikt = false;
-//				}
-//			}
-//		}
 	}
 
 	void toonPakje() {
+		System.out.println("Het pakje ziet er zo uit:");
 		for (int i = 0; i < this.pakjeGeschud.length; i++) {
-			System.out.print(this.pakjeGeschud[i].kleur + " ");
-			System.out.println(this.pakjeGeschud[i].naam);
+			System.out.print(this.pakjeGeschud[i].symbool + " ");
+			System.out.print(this.pakjeGeschud[i].naam + " | ");
+
 		}
+		System.out.println("==========");
+		System.out.println();
 	}
 
 	Card geefKaart() {
@@ -168,6 +190,7 @@ class Card {
 	String naam;
 	int waarde;
 	String kleur;
+	char symbool;
 	boolean aas;
 
 	Card(int nr, String kleur) {
@@ -192,6 +215,20 @@ class Card {
 			this.naam = Integer.toString(nr);
 			this.waarde = nr;
 			this.aas = false;
+		}
+		switch (kleur) {
+		case "Harten":
+			this.symbool = (char) '\u2661';
+			break;
+		case "Ruiten":
+			this.symbool = (char) '\u2662';
+			break;
+		case "Schoppen":
+			this.symbool = (char) '\u2660';
+			break;
+		case "Klaver":
+			this.symbool = (char) '\u2663';
+			break;
 		}
 	}
 
