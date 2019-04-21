@@ -61,7 +61,7 @@ public class BlackJackApp {
 		}
 		// en nu de bank, die stopt als hij 17 of hoger heeft
 		int j = 2;
-		while (bankScore < 17) {
+		while (bankScore < 17 && spelerScore < 22)  {
 			bank.add(pakje.geefKaart());
 			bankScore = spel.bepaalScore(bankScore, bank.get(j).waarde);
 			System.out.println("==========");
